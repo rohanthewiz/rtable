@@ -23,7 +23,7 @@ type ColAttr struct {
 	WidthPercent int
 }
 
-func CreateTable(tblOpts *TableOptions, clkHdlr func(cell widget.TableCellID)) (tbl *widget.Table) {
+func CreateTable(tblOpts *TableOptions, clkHdlr ...func(cell widget.TableCellID)) (tbl *widget.Table) {
 	tbl = widget.NewTable(
 		// Dimensions (rows, cols)
 		func() (int, int) {
@@ -52,7 +52,9 @@ func CreateTable(tblOpts *TableOptions, clkHdlr func(cell widget.TableCellID)) (
 			cnvObj.(*widget.Label).Bind(datum.(binding.String))
 		})
 
-	tbl.OnSelected = clkHdlr
+	if len(clkHdlr) > 0 {
+		tbl.OnSelected = clkHdlr[0]
+	}
 
 	refWidth := widget.NewLabel(tblOpts.RefWidth).MinSize().Width
 
