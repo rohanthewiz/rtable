@@ -44,6 +44,10 @@ func CreateTable(tblOpts *TableOptions, clkHdlr ...func(cell widget.TableCellID)
 				return
 			}
 
+			if cell.Col == 0 {
+				cnvObj = widget.NewCheck("", func(bool) {})
+			}
+
 			datum, err := getTableDatum(cell, tblOpts)
 			if err != nil {
 				fmt.Println(rerr.StringFromErr(err))
