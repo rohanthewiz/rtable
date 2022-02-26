@@ -43,4 +43,6 @@ func TestRTable(t *testing.T) {
 		t.Log("Table was not properly created")
 		t.Fail()
 	}
+	wn.SetContent(tbl)
+	wn.Show()
 }

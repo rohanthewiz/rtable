@@ -5,6 +5,7 @@ import (
 	"log"
 
 	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/data/binding"
 	"fyne.io/fyne/v2/widget"
 	"github.com/rohanthewiz/rerr"
@@ -31,25 +32,37 @@ func CreateTable(tblOpts *TableOptions, clkHdlr ...func(cell widget.TableCellID)
 		},
 		// Default
 		func() fyne.CanvasObject {
-			return widget.NewLabel(" - ")
+			chk := widget.NewCheck("", func(c bool) {
+				log.Println("Chk Clicked")
+			})
+			ctr := container.NewMax(chk, widget.NewLabel(""))
+			chk.Hide()
+			return ctr
 		},
 		// Set Values
-		func(cell widget.TableCellID, cnvObj fyne.CanvasObject) {
+		func(position widget.TableCellID, cnvObj fyne.CanvasObject) {
 			// for no binding just use SetText -> cnvObj.(*widget.Label).SetText(data[i.Row][i.Col])
-			if cell.Row == 0 { // header row
+			c := cnvObj.(*fyne.Container)
+			for _, obj := range c.Objects {
+				switch typedObj := obj.(type) {
+				case *widget.Label:
+				}
+			}
+
+			if position.Row == 0 { // header row
 				label := cnvObj.(*widget.Label)
 				label.Alignment = fyne.TextAlignCenter
 				label.TextStyle = fyne.TextStyle{Bold: true}
-				label.SetText(tblOpts.ColAttrs[cell.Col].Header)
+				label.SetText(tblOpts.ColAttrs[position.Col].Header)
 				return
 			}
 
-			if cell.Col == 0 {
+			if position.Col == 0 {
 				cnvObj = widget.NewCheck(" ", func(bool) {})
 				return
 			}
 
-			datum, err := getTableDatum(cell, tblOpts)
+			datum, err := getTableDatum(position, tblOpts)
 			if err != nil {
 				fmt.Println(rerr.StringFromErr(err))
 				return
