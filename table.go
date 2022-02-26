@@ -40,34 +40,33 @@ func CreateTable(tblOpts *TableOptions, clkHdlr ...func(cell widget.TableCellID)
 			return ctr
 		},
 		// Set Values
-		func(position widget.TableCellID, cnvObj fyne.CanvasObject) {
-			// for no binding just use SetText -> cnvObj.(*widget.Label).SetText(data[i.Row][i.Col])
-			c := cnvObj.(*fyne.Container)
-			for _, obj := range c.Objects {
-				switch typedObj := obj.(type) {
-				case *widget.Label:
-				}
-			}
-
+		func(position widget.TableCellID, cvObj fyne.CanvasObject) {
 			if position.Row == 0 { // header row
-				label := cnvObj.(*widget.Label)
+				label := cvObj.(*widget.Label)
 				label.Alignment = fyne.TextAlignCenter
 				label.TextStyle = fyne.TextStyle{Bold: true}
 				label.SetText(tblOpts.ColAttrs[position.Col].Header)
 				return
 			}
-
-			if position.Col == 0 {
-				cnvObj = widget.NewCheck(" ", func(bool) {})
-				return
-			}
-
+			// Get the datum for the non-hdr positions
 			datum, err := getTableDatum(position, tblOpts)
 			if err != nil {
 				fmt.Println(rerr.StringFromErr(err))
 				return
 			}
-			cnvObj.(*widget.Label).Bind(datum.(binding.String))
+			// cvObj.(*widget.Label).Bind(datum.(binding.String))
+			con := cvObj.(*fyne.Container)
+			for _, conObj := range con.Objects {
+				switch obj := conObj.(type) {
+				case *widget.Label:
+					obj.Bind(datum.(binding.String))
+				case *widget.Check:
+					if position.Col == 0 {
+						// obj.SetChecked(true) // hard-wired true for now
+					}
+				}
+			}
+			// for no binding just use SetText -> cvObj.(*widget.Label).SetText(data[i.Row][i.Col])
 		})
 
 	if len(clkHdlr) > 0 {
