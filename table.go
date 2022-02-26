@@ -62,7 +62,7 @@ func CreateTable(tblOpts *TableOptions, clkHdlr ...func(cell widget.TableCellID)
 					obj.Bind(datum.(binding.String))
 				case *widget.Check:
 					if position.Col == 0 {
-						// obj.SetChecked(true) // hard-wired true for now
+						obj.SetChecked(true) // hard-wired true for now
 					}
 				}
 			}
