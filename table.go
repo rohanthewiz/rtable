@@ -41,31 +41,48 @@ func CreateTable(tblOpts *TableOptions, clkHdlr ...func(cell widget.TableCellID)
 		},
 		// Set Values
 		func(position widget.TableCellID, cvObj fyne.CanvasObject) {
-			if position.Row == 0 { // header row
-				label := cvObj.(*widget.Label)
-				label.Alignment = fyne.TextAlignCenter
-				label.TextStyle = fyne.TextStyle{Bold: true}
-				label.SetText(tblOpts.ColAttrs[position.Col].Header)
-				return
-			}
-			// Get the datum for the non-hdr positions
-			datum, err := getTableDatum(position, tblOpts)
-			if err != nil {
-				fmt.Println(rerr.StringFromErr(err))
-				return
-			}
+			// Type Switch
 			// cvObj.(*widget.Label).Bind(datum.(binding.String))
 			con := cvObj.(*fyne.Container)
 			for _, conObj := range con.Objects {
 				switch obj := conObj.(type) {
 				case *widget.Label:
+					if position.Row == 0 { // header row
+						obj.Alignment = fyne.TextAlignCenter
+						obj.TextStyle = fyne.TextStyle{Bold: true}
+						obj.SetText(tblOpts.ColAttrs[position.Col].Header)
+						return
+					}
+					if position.Col == 0 { // checkboxes only in 1st col
+						obj.Hide()
+						return
+					}
+					datum, err := getTableDatum(position, tblOpts)
+					if err != nil {
+						fmt.Println(rerr.StringFromErr(err))
+						return
+					}
 					obj.Bind(datum.(binding.String))
 				case *widget.Check:
-					if position.Col == 0 {
+					if position.Row > 0 && position.Col == 0 {
 						obj.SetChecked(true) // hard-wired true for now
+						obj.Show()
+					} else {
+						obj.Hide() // may not be necessary, but making sure
 					}
 				}
 			}
+
+			if position.Row == 0 { // header row
+				label, ok := cvObj.(*widget.Label) // Maybe the best approach is to do the type switch above 1st
+				if ok {
+					label.Alignment = fyne.TextAlignCenter
+					label.TextStyle = fyne.TextStyle{Bold: true}
+					label.SetText(tblOpts.ColAttrs[position.Col].Header)
+				}
+				return
+			}
+			// Get the datum for the non-hdr positions
 			// for no binding just use SetText -> cvObj.(*widget.Label).SetText(data[i.Row][i.Col])
 		})
 
