@@ -33,7 +33,7 @@ func CreateTable(tblOpts *TableOptions, clkHdlr ...func(cell widget.TableCellID)
 		// Default
 		func() fyne.CanvasObject {
 			chk := widget.NewCheck("", func(c bool) {
-				log.Println("Chk Clicked")
+				// log.Println("Chk Clicked")
 			})
 			ctr := container.NewMax(chk, widget.NewLabel(""))
 			chk.Hide()
@@ -66,6 +66,9 @@ func CreateTable(tblOpts *TableOptions, clkHdlr ...func(cell widget.TableCellID)
 				case *widget.Check:
 					if position.Row > 0 && position.Col == 0 {
 						obj.SetChecked(true) // hard-wired true for now
+						obj.OnChanged = func(b bool) {
+							fmt.Println("Clicked =-> rowIdx:", position.Row, "colIdx", position.Col)
+						}
 						obj.Show()
 					} else {
 						obj.Hide() // may not be necessary, but making sure
