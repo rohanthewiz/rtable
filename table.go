@@ -32,17 +32,13 @@ func CreateTable(tblOpts *TableOptions, clkHdlr ...func(cell widget.TableCellID)
 		},
 		// Default
 		func() fyne.CanvasObject {
-			chk := widget.NewCheck("", func(c bool) {
-				// log.Println("Chk Clicked")
-			})
+			chk := widget.NewCheck("", func(c bool) {}) // empty handler to start
 			ctr := container.NewMax(chk, widget.NewLabel(""))
 			chk.Hide()
 			return ctr
 		},
 		// Set Values
 		func(position widget.TableCellID, cvObj fyne.CanvasObject) {
-			// Type Switch
-			// cvObj.(*widget.Label).Bind(datum.(binding.String))
 			con := cvObj.(*fyne.Container)
 			for _, conObj := range con.Objects {
 				switch obj := conObj.(type) {
@@ -53,7 +49,7 @@ func CreateTable(tblOpts *TableOptions, clkHdlr ...func(cell widget.TableCellID)
 						obj.SetText(tblOpts.ColAttrs[position.Col].Header)
 						return
 					}
-					if position.Col == 0 { // checkboxes only in 1st col
+					if position.Col == 0 { // non-header row, 1st col - show checkboxes only
 						obj.Hide()
 						return
 					}
@@ -65,7 +61,13 @@ func CreateTable(tblOpts *TableOptions, clkHdlr ...func(cell widget.TableCellID)
 					obj.Bind(datum.(binding.String))
 				case *widget.Check:
 					if position.Row > 0 && position.Col == 0 {
-						obj.SetChecked(true) // hard-wired true for now
+						datum, err := getTableDatum(position, tblOpts) // Maybe - optmz later
+						if err != nil {
+							fmt.Println(rerr.StringFromErr(err))
+							return
+						}
+						obj.Bind(datum.(binding.Bool))
+						// obj.SetChecked(true) // hard-wired true for now
 						obj.OnChanged = func(b bool) {
 							fmt.Println("Clicked =-> rowIdx:", position.Row, "colIdx", position.Col)
 						}
@@ -85,7 +87,6 @@ func CreateTable(tblOpts *TableOptions, clkHdlr ...func(cell widget.TableCellID)
 				}
 				return
 			}
-			// Get the datum for the non-hdr positions
 			// for no binding just use SetText -> cvObj.(*widget.Label).SetText(data[i.Row][i.Col])
 		})
 
@@ -111,6 +112,19 @@ func GetStrCellValue(cell widget.TableCellID, tblOpts *TableOptions) (str string
 	str, err = datum.(binding.String).Get()
 	if err != nil {
 		return str, rerr.Wrap(err)
+	}
+	return
+}
+
+func GetBoolCellValue(cell widget.TableCellID, tblOpts *TableOptions) (val bool, err error) {
+	datum, err := getTableDatum(cell, tblOpts)
+	if err != nil {
+		return val, rerr.Wrap(err)
+	}
+
+	val, err = datum.(binding.Bool).Get()
+	if err != nil {
+		return val, rerr.Wrap(err)
 	}
 	return
 }
