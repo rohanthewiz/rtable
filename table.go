@@ -68,9 +68,9 @@ func CreateTable(tblOpts *TableOptions, clkHdlr ...func(cell widget.TableCellID)
 						}
 						obj.Bind(datum.(binding.Bool))
 						// obj.SetChecked(true) // hard-wired true for now
-						obj.OnChanged = func(b bool) {
-							fmt.Println("Clicked =-> rowIdx:", position.Row, "colIdx", position.Col)
-						}
+						// obj.OnChanged = func(b bool) {
+						// 	fmt.Println("Clicked =-> rowIdx:", position.Row, "colIdx", position.Col)
+						// }
 						obj.Show()
 					} else {
 						obj.Hide() // may not be necessary, but making sure
