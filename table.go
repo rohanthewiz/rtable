@@ -24,7 +24,7 @@ type ColAttr struct {
 	WidthPercent int
 }
 
-func CreateTable(tblOpts *TableOptions, clkHdlr ...func(cell widget.TableCellID)) (tbl *widget.Table) {
+func CreateTable(tblOpts *TableOptions, chkHdlr ...func(state bool, row, col int)) (tbl *widget.Table) {
 	tbl = widget.NewTable(
 		// Dimensions (rows, cols)
 		func() (int, int) {
@@ -68,9 +68,13 @@ func CreateTable(tblOpts *TableOptions, clkHdlr ...func(cell widget.TableCellID)
 						}
 						obj.Bind(datum.(binding.Bool))
 						// obj.SetChecked(true) // hard-wired true for now
-						// obj.OnChanged = func(b bool) {
-						// 	fmt.Println("Clicked =-> rowIdx:", position.Row, "colIdx", position.Col)
-						// }
+						obj.OnChanged = func(b bool) { // Todo pass this function in that takes position and bool
+							// that will update the binding for us.
+							fmt.Println("Clicked =-> rowIdx:", position.Row, "colIdx", position.Col)
+							if len(chkHdlr) > 0 {
+								chkHdlr[0](b, position.Row, position.Col)
+							}
+						}
 						obj.Show()
 					} else {
 						obj.Hide() // may not be necessary, but making sure
@@ -90,9 +94,9 @@ func CreateTable(tblOpts *TableOptions, clkHdlr ...func(cell widget.TableCellID)
 			// for no binding just use SetText -> cvObj.(*widget.Label).SetText(data[i.Row][i.Col])
 		})
 
-	if len(clkHdlr) > 0 {
-		tbl.OnSelected = clkHdlr[0]
-	}
+	// if len(clkHdlr) > 0 {
+	// 	tbl.OnSelected = clkHdlr[0]
+	// }
 
 	refWidth := widget.NewLabel(tblOpts.RefWidth).MinSize().Width
 
